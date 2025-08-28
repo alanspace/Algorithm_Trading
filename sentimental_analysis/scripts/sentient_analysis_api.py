@@ -8,17 +8,24 @@ import math
 import re
 from datetime import datetime, timedelta
 from transformers import pipeline
+from dotenv import load_dotenv
+
+# --- Correctly load the .env file from the project root ---
+script_dir = os.path.dirname(__file__)
+project_root = os.path.abspath(os.path.join(script_dir, "../../"))
+dotenv_path = os.path.join(project_root, ".env")
+load_dotenv(dotenv_path=dotenv_path)
+
+# --- Load the API key into the 'api_key' variable ---
+api_key = os.getenv("FINNHUB_API_KEY")
+
+if api_key is None:
+    print("Error: FINNHUB_API_KEY not found in .env or environment variables.")
+else:
+    print(f"Successfully loaded API Key starting with: {api_key[:4]}...")
 
 # --- 1. CONFIGURATION ---
-
-# ==> CRITICAL: PASTE YOUR **OWN PERSONAL** FINNHUB.IO API KEY HERE <==
-# Get your free key from https://finnhub.io/register. The example key will not work.
-FINNHUB_API_KEY = "d1ltaopr01qg4dbl8tbgd1ltaopr01qg4dbl8tc0"
-
-# Directory to save the output charts
 SAVE_DIR = "sentiment_charts"
-
-# Define stock categories
 STOCK_CATEGORIES = {
     "Disruptive Tech & EV": ["PLTR", "TSLA"],
     "Semiconductor & AI Hardware": ["NVDA", "AVGO", "TSM", "AMD", "QCOM", "MU", "INTC"],
@@ -28,8 +35,6 @@ STOCK_CATEGORIES = {
     "Energy Sector": ["OXY", "ENPH", "COP"],
     "Commodities (ETF)": ["SLV"]
 }
-
-# Map tickers to common names for better headline filtering
 COMPANY_NAME_MAP = {
     "AAPL": "Apple", "TSLA": "Tesla", "GOOG": "Google", "NVDA": "Nvidia", "TSM": "TSMC",
     "AVGO": "Broadcom", "PLTR": "Palantir", "RTX": "RTX", "LHX": "L3Harris",
@@ -39,8 +44,6 @@ COMPANY_NAME_MAP = {
     "NFLX": "Netflix", "CAT": "Caterpillar", "OXY": "Occidental", "ENPH": "Enphase",
     "COP": "ConocoPhillips", "SLV": "Silver"
 }
-
-# --- Analysis & Plotting Parameters ---
 DAYS_TO_ANALYZE = 14
 PLOT_COLS = 2
 SENTIMENT_EWMA_SPAN = 3
@@ -50,11 +53,13 @@ MIN_BAR_ALPHA = 0.3
 
 def fetch_news(ticker, start_date, end_date):
     """Fetches news for a ticker from Finnhub."""
-    if not FINNHUB_API_KEY or FINNHUB_API_KEY == "YOUR_API_KEY_HERE":
+    # *** FIX: Use the correct 'api_key' variable ***
+    if not api_key or api_key == "YOUR_API_KEY_HERE":
         print(f"Skipping News for {ticker}: Finnhub API key is not set.")
         return []
     try:
-        params = {'symbol': ticker, 'from': start_date.strftime('%Y-%m-%d'), 'to': end_date.strftime('%Y-%m-%d'), 'token': FINNHUB_API_KEY}
+        # *** FIX: Use the correct 'api_key' variable ***
+        params = {'symbol': ticker, 'from': start_date.strftime('%Y-%m-%d'), 'to': end_date.strftime('%Y-%m-%d'), 'token': api_key}
         r = requests.get("https://finnhub.io/api/v1/company-news", params=params, timeout=15)
         r.raise_for_status()
         return r.json()
@@ -113,10 +118,8 @@ def process_ticker_data(ticker, sentiment_pipeline):
 
     price_series.index = price_series.index.tz_localize(None)
     
-    # --- *** FINAL, ROBUST FIX IS HERE *** ---
     combined = pd.DataFrame(price_series)
-    combined.columns = ['price'] # Explicitly name the price column
-    # Join sentiment data. This correctly adds NaN columns if sentiment_df is empty.
+    combined.columns = ['price']
     combined = combined.join(sentiment_df)
 
     combined['sentiment_trend'] = combined['sentiment'].ewm(span=SENTIMENT_EWMA_SPAN, adjust=False, min_periods=1).mean()
@@ -130,45 +133,34 @@ def process_ticker_data(ticker, sentiment_pipeline):
 
     return {'ticker': ticker, 'data': combined, 'overall_sent': final_score, 'price_delta': price_delta_percent, 'headline_count': total_headlines}
 
-# --- 3. PLOTTING ---
-
+# --- 3. PLOTTING --- (No changes needed here)
 def create_stock_plot(ax, processed_data):
     """Creates a single sentiment vs. price subplot."""
     if processed_data is None: return None, None
-
     ticker, df = processed_data['ticker'], processed_data['data']
-    
     ax.set_title(f"{ticker} (Sent: {processed_data['overall_sent']:.2f} | Price Δ: {processed_data['price_delta']:+.2f}% | {processed_data['headline_count']} Headlines)", fontweight='bold')
     ax.grid(True, which='major', axis='y', linestyle='--', linewidth=0.5)
     ax.set_ylim(-1.05, 1.05)
     ax.set_ylabel("Sentiment Score")
-
     max_count = df['headline_count'].max()
     if max_count == 0 or pd.isna(max_count): max_count = 1
     alphas = MIN_BAR_ALPHA + (1 - MIN_BAR_ALPHA) * (df['headline_count'] / max_count)
     alphas.fillna(0, inplace=True)
-
     for i in range(len(df)):
         color = '#2ca02c' if df['sentiment'].iloc[i] > 0 else '#d62728'
         ax.bar(df.index[i], df['sentiment'].iloc[i], color=color, width=0.6, alpha=alphas.iloc[i], zorder=2)
-    
     bar_pos = plt.Rectangle((0,0),1,1, color='#2ca02c', alpha=0.6)
     bar_neg = plt.Rectangle((0,0),1,1, color='#d62728', alpha=0.6)
-    
     trend_plot, = ax.plot(df.index, df['sentiment_trend'], color='#FF7F0E', linewidth=2.5, zorder=4, label='Sentiment Trend')
     ax.axhline(0, color='black', linestyle='--', linewidth=0.7, zorder=1)
-    
     ax2 = ax.twinx()
     price_plot, = ax2.plot(df.index, df['price'], marker='.', linestyle='-', color='#1f77b4', zorder=3, label='Stock Price')
     ax2.set_ylabel("Stock Price ($)")
-
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
     plt.setp(ax.get_xticklabels(), rotation=30, ha='right')
-
     return ((bar_pos, bar_neg), trend_plot, price_plot)
 
-# --- 4. MAIN EXECUTION ---
-
+# --- 4. MAIN EXECUTION --- (No changes needed here)
 if __name__ == "__main__":
     print("Loading sentiment analysis model...")
     try:

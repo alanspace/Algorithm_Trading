@@ -1,12 +1,17 @@
 import pandas as pd
 from alpha_vantage.timeseries import TimeSeries
 import os
+from dotenv import load_dotenv
 
-# --- Configuration ---
-# IMPORTANT: Replace 'YOUR_API_KEY' with your actual Alpha Vantage API key.
-# For better security, it's recommended to set this as an environment variable
-# instead of hardcoding it in the script.
-API_KEY = '82XSD04QLRCC4EOW'
+load_dotenv()
+
+api_key = os.getenv("API_KEY")
+
+if api_key is None:
+    print("Error: API_KEY not found in .env or environment variables.")
+else:
+    print(f"API Key: {api_key}")
+
 STOCK_SYMBOL = 'AAPL'
 
 def get_real_time_apple_data(api_key):
@@ -55,14 +60,14 @@ def get_real_time_apple_data(api_key):
 
 # --- Main Execution ---
 if __name__ == "__main__":
-    if API_KEY == 'YOUR_API_KEY':
+    if api_key == 'API_KEY':
         print("="*60)
-        print("WARNING: Please replace 'YOUR_API_KEY' with your actual key.")
+        print("WARNING: Please replace 'API_KEY' with your actual key.")
         print("You can get a free key from: https://www.alphavantage.co/support/#api-key")
         print("="*60)
     else:
         # Get the real-time data
-        apple_df = get_real_time_apple_data(API_KEY)
+        apple_df = get_real_time_apple_data(api_key)
 
         # Print the resulting DataFrame
         if apple_df is not None:
