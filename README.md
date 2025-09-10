@@ -25,6 +25,44 @@ This repository contains a collection of Python scripts for performing quantitat
 - **NLP:** NLTK, Hugging Face Transformers
 - **Plotting:** Matplotlib, Seaborn
 
+## 🏆 Results Showcase
+
+Here are some concrete results from the analysis scripts:
+
+### 1. Sharpe Ratio Optimization
+
+The `sharpe_ratio.py` script optimizes a portfolio to maximize its risk-adjusted return. For a portfolio of `['AAPL', 'TSLA', 'AMZN', 'GOOG', 'META']`, the script was able to improve the Sharpe Ratio from **0.67** to **0.73**.
+
+**Initial Portfolio (Equal Weights):**
+```
+Expected Annual Return: 23.21%
+Annual Volatility: 31.58%
+Sharpe Ratio: 0.67
+```
+
+**Optimized Portfolio (Max Sharpe Ratio):**
+```
+Optimal weight for AAPL: 56.92%
+Optimal weight for TSLA: 0.00%
+Optimal weight for AMZN: 26.40%
+Optimal weight for GOOG: 0.00%
+Optimal weight for META: 16.67%
+
+Expected Annual Return: 24.34%
+Annual Volatility: 30.43%
+Sharpe Ratio: 0.73
+```
+
+### 2. Moving Average Crossover Backtest
+
+The `algorithmtrading_gridsearch.py` script performs a grid search to find the most profitable parameters for a moving average crossover strategy on AAPL stock data. The backtest yielded the following results:
+
+```
+- The best short window is: 10
+- The best long window is: 110
+- The best profit is: $102,528.70
+```
+
 ## 📂 Project Structure
 
 The repository is organized to separate source code from generated results, making it clean and easy to navigate.
@@ -36,23 +74,10 @@ The repository is organized to separate source code from generated results, maki
 ├── requirements.txt
 ├── .env
 ├── src/
-│   ├── algorithmtrading_gridsearch.py
-│   ├── investment_analyzer.py
-│   ├── portfolio_weight.py
-│   ├── sharpe_ratio.py
-│   ├── vantage_API.py
-│   ├── hk_stock/
-│   ├── us_stock/
-│   └── sentimental_analysis/
+│   ├── ... (all python scripts)
 └── results/
-    ├── hk_stock/
-    └── sentimental_analysis/
+    ├── ... (all generated charts)
 ```
-
-- **`src/`**: Contains all core Python scripts.
-- **`results/`**: The default output directory for all generated charts and analysis files.
-- **`requirements.txt`**: A list of all Python dependencies.
-- **`.env`**: File for storing private API keys (this is ignored by git).
 
 ## 🚀 Getting Started
 
