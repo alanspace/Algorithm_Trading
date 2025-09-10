@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 # --- Correctly load the .env file from the project root ---
 script_dir = os.path.dirname(__file__)
-project_root = os.path.abspath(os.path.join(script_dir, "../../"))
+project_root = os.path.abspath(os.path.join(script_dir, "../../../"))
 dotenv_path = os.path.join(project_root, ".env")
 load_dotenv(dotenv_path=dotenv_path)
 
@@ -25,7 +25,7 @@ else:
     print(f"Successfully loaded API Key starting with: {api_key[:4]}...")
 
 # --- 1. CONFIGURATION ---
-SAVE_DIR = "sentiment_charts"
+SAVE_DIR = os.path.join(project_root, "results", "sentimental_analysis")
 STOCK_CATEGORIES = {
     "Disruptive Tech & EV": ["PLTR", "TSLA"],
     "Semiconductor & AI Hardware": ["NVDA", "AVGO", "TSM", "AMD", "QCOM", "MU", "INTC"],

@@ -1,1 +1,27 @@
+# Environment variables
 .env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+dist/
+
+# IDE / Editor specific
+.vscode/
+.idea/
+
+# OS-specific
+.DS_Store
+
+# Generated output
+results/
+sentimental_analysis/sentiment_charts/
+sentimental_analysis/images/
+sentimental_analysis/7_day_charts/
+sentimental_analysis/14_day_charts/
+HK_Stock/images/

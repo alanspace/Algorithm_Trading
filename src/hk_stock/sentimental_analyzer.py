@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import talib
 from datetime import date, datetime
 import textwrap
+import os
 
 # --- Sentiment Analysis & Deep Learning Libraries ---
 import nltk
@@ -169,7 +170,8 @@ else:
     plt.plot(valid['Predictions'], label='Predicted Price')
     plt.legend(loc='lower right')
     plt.grid(True)
-    plt.savefig(f'lstm_prediction_{ticker_symbol}.png')
+    save_path = os.path.join(os.path.dirname(__file__), '../../results/hk_stock', f'lstm_prediction_{ticker_symbol}.png')
+    plt.savefig(save_path)
     print(f"\nPrediction chart saved as 'lstm_prediction_{ticker_symbol}.png'")
     plt.show()
 

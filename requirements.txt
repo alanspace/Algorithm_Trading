@@ -6,3 +6,13 @@ numpy
 requests
 transformers
 TA-Lib
+python-dotenv
+
+torch
+torchvision
+torchaudio
+tensorflow
+scikit-learn
+nltk
+alpha-vantage
+tf-keras
