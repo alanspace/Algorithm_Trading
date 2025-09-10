@@ -19,9 +19,6 @@ dist/
 .DS_Store
 
 # Generated output
-results/
-sentimental_analysis/sentiment_charts/
-sentimental_analysis/images/
-sentimental_analysis/7_day_charts/
-sentimental_analysis/14_day_charts/
-HK_Stock/images/
+results/**/*.png
+!results/sentimental_analysis/Disruptive_Tech__EV.png
+!results/hk_stock/lstm_prediction_1398.HK.png
